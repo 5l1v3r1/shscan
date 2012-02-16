@@ -175,11 +175,6 @@ def main():
 			print '[-] %s'%j
 	
 	# port scan.
-	# There's a limit to the maximum number of descriptors
-	# a system can have open at a time.  The default in ubuntu-based
-	# systems is 1024 (ulimit -n).  To mitigate overloading that and
-	# crashing and burning, I sleep the loop every 1000 threads to
-	# give them time to close before spawning the next batch.
 	if options.port_scan is True:
 		print '[+] Port scanning \'%s\''%options.addr
 		(lower, sep, upper) = options.p_range.partition("-")
