@@ -3,6 +3,7 @@ import re
 import subprocess
 import paramiko
 import socket
+import time
 from threading import Thread
 from optparse import OptionParser
 
@@ -50,15 +51,21 @@ def shscan(ip, port):
 
 # simple port scanner for some basic stuff
 def port_scan(addr, port):
-	sock = socket.socket()
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.settimeout(1.0)
 	try:
 		sock.connect((addr, port))
 		print '[+] Open port at %s'%port
+		sock.close()
+		sock = None
 		return True
 	except socket.error, e:
+		sock.close()
+		sock = None
 		return False
 	except Exception:
+		sock.close()
+		sock = None
 		return False
 
 # entry
@@ -111,10 +118,18 @@ def main():
 				thread = Thread(target=shscan, args=(options.addr, i))
 				thread.start()
 	
-	# port scan
+	# port scan.
+	# There's a limit to the maximum number of descriptors
+	# a system can have open at a time.  The default in ubuntu-based
+	# systems is 1024 (ulimit -n).  To mitigate overloading that and
+	# crashing and burning, I sleep the loop every 1000 threads to
+	# give them time to close before spawning the next batch.
 	if options.port_scan is True:
+		print '[+] Port scanning \'%s\''%options.addr
 		(lower, sep, upper) = options.p_range.partition("-")
 		for i in range(int(lower), int(upper)):
+			if i%1000 == 0:
+				time.sleep(1)
 			thread = Thread(target=port_scan, args=(options.addr, i))
 			thread.start()
 
