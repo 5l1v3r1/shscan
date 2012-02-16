@@ -28,8 +28,7 @@ def check_host ( addr ):
 			return True
 		else:
 			return False
-	except Exception, j:
-		print j
+	except Exception:
 		return False
 
 # look for shells returned to us and dish out some fake creds.
@@ -72,7 +71,7 @@ def main():
 					  action="store", dest="p_range" )
 	parser.add_option("-i", help="The address to scan",
 					  action="store", dest="addr") 
-	parser.add_option("-a", help="Scan all 65,535 ports (could take awhile!)", 
+	parser.add_option("-a", help="Scan all 65,535 ports", 
 					  action="store_true", default=False, dest="all_ports")
 	parser.add_option("-p", help="Do a port scan of the given ports (with -r)",
 					  action="store_true", default=False, dest="port_scan")
