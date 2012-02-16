@@ -5,8 +5,12 @@ Running a scan of all 65,535 ports doesn't take that long, so don't be afraid of
 
 This uses paramiko SSH libs and a few other standard ones.
 
-Currently working on maximizing the number of parallel threads on a per system
-basis.  There's a weird issue involving max proc threads related to ulimit and
-system memory.  More information here:
-
+shscan automatically generates the maximum number of threads that can be 
+generated on your system.  This is done by taking the total RAM on the box and
+dividing it by the currently set ulimit -s.  Thanks to the below blog for
+the information:
 http://www.alak.cc/2011/11/python-threaderror-cant-start-new.html
+
+If you get [-] can't start new thread, then ulimit is set too high or there's
+some issues with how i'm calculating it.  You can shoot me an email if you
+feel so inclined.
