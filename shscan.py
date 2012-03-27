@@ -113,8 +113,8 @@ def main():
 					"The default scan searches only the first 1023 ports.")
 	parser.add_option("-s", help="Skip host discovery", action="store_true", 
 							default=False, dest="skip")
-	parser.add_option("-r", metavar="x-y", help="Specify a range of ports", 
-					  action="store", dest="p_range" )
+	parser.add_option("-r", metavar="x-y", help="Specify a range of ports, " 
+					"or give it a single port",  action="store", dest="p_range" )
 	parser.add_option("-i", help="The address to scan",
 					  action="store", dest="addr") 
 	parser.add_option("-a", help="Scan all 65,535 ports", 
@@ -161,6 +161,10 @@ def main():
 		print '[+] Scanning \'%s\''%options.addr 
 		try:
 			if options.p_range is not None:
+				# if the - is not found, it's a single port
+				if not "-" in options.p_range:
+					shscan(options.addr, int(options.p_range))
+					sys.exit(0)
 				(lower, sep, upper) = options.p_range.partition("-")
 				for i in range(int(lower),int(upper)):
 					if i%THREAD_MAX == 0:
