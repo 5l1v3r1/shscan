@@ -15,12 +15,14 @@ DEBUG_FLAG = False
 # we're probably getting denied by a firewall/router or the system is 
 # configured to deny icmp echo requests.
 def check_host ( addr ):
+	global DEBUG_FLAG
 	try:
 		process = subprocess.Popen(['ping', '-c', '2', '-W', '1', addr], 
 						stdout = subprocess.PIPE,
 						stderr = subprocess.PIPE)
 		process.wait()
 		line = process.stdout.read().decode("utf-8")
+		if DEBUG_FLAG: print "[dbg] Host returned: \n%s"%line
 		up = re.search("\d.*? received", line)
 		proh = re.search("Host Prohibited", line)
 		if proh:
@@ -54,8 +56,10 @@ def shscan(ip, port):
 
 # simple port scanner for some basic stuff
 def port_scan(addr, port):
+	global DEBUG_FLAG
 	sock = socket.socket()
 	sock.settimeout(1.0)
+	if DEBUG_FLAG: print "[dbg] Knocking on port %d"%port
 	try:
 		sock.connect((addr, port))
 		print '[+] Open port at %s'%port
@@ -108,7 +112,8 @@ def thread_limit():
 def main():
 	global DEBUG_FLAG
 
-	parser = OptionParser()
+	parser = OptionParser(epilog=
+					"The default scan searches only the first 1023 ports.")
 	parser.add_option("-s", help="Skip host discovery", action="store_true", 
 							default=False, dest="skip")
 	parser.add_option("-r", metavar="x-y", help="Specify a range of ports", 
