@@ -80,9 +80,7 @@ def port_scan(addr, port):
 # Systems generally have different settings for thread caps
 # both with totals and per process.  So instead of hard coding
 # a default, just automatically calculate and return a thread max.
-# Also subtract 200 from the returned THREAD_MAX because the user is
-# obviously goign to have stuff open eating up the max.  200 seems
-# to be a safe number.
+# There's also now a command for manually setting the thread count.
 def thread_limit():
 	global DEBUG_FLAG
 	try:
@@ -101,9 +99,8 @@ def thread_limit():
 		if DEBUG_FLAG:
 			print '[dbg] Mem: %d'%int(total_mem/1024)
 			print '[dbg] Threads: %d'%int(total_t)
-			print '[dbg] Net total threads: %d'%MAX
-			print '[dbg] Actual Total: %d'%(MAX-200)
-		return (MAX - 200)
+			print '[dbg] Net max threads: %d'%MAX
+		return MAX 
 	except Exception, j:
 		print '[-] Couldn\'t get thread max: \'%s\''%j
 		return
@@ -126,14 +123,22 @@ def main():
 					  action="store_true", default=False, dest="port_scan")
 	parser.add_option("-v", help="Verbose output with debug",
 					  action="store_true", default=False, dest="verbose")
+	parser.add_option("-t", help="Manually set thread count", dest="threads",
+					  action="store" )
 
 	# parse options, set global debug flag
 	(options, args) = parser.parse_args()
 	DEBUG_FLAG = options.verbose
 
-	# Get the max number of threads to spawn in a batch.
-	THREAD_MAX = thread_limit()
+	# set thread max
+	if options.threads is not None:
+		THREAD_MAX = int(options.threads)
+	else:
+		THREAD_MAX = thread_limit()
 	
+	if DEBUG_FLAG:
+		print '[dbg] Using %d threads'%THREAD_MAX
+
 	# ditch if they didn't give us an addr
 	if options.addr is None:
 		print 'Use -i to specify an address (-h for help)'
