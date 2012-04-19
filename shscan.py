@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys
 import re
 import subprocess
@@ -46,7 +48,7 @@ def shscan(ip, port):
 		w = ssh.connect(ip, port, username='test', 
 				password='test', timeout=1.0)
 		ssh.close()
-	except paramiko.SSHException, j:
+	except paramiko.AuthenticationException, j:
 		ssh.close()
 		print '[+] SSH found at port %s'%port
 		return
@@ -59,7 +61,6 @@ def port_scan(addr, port):
 	global DEBUG_FLAG
 	sock = socket.socket()
 	sock.settimeout(1.0)
-	if DEBUG_FLAG: print "[dbg] Knocking on port %d"%port
 	try:
 		sock.connect((addr, port))
 		print '[+] Open port at %s'%port
@@ -193,6 +194,10 @@ def main():
 		print '[+] Port scanning \'%s\''%options.addr
 		# scan the given range
 		if options.p_range is not None:
+			# or the single port
+			if not '-' in options.p_range:
+				port_scan(options.addr, int(options.p_range))
+				sys.exit(0)
 			(lower, sep, upper) = options.p_range.partition("-")
 			for i in range(int(lower), int(upper)):
 				if i%THREAD_MAX == 0:
