@@ -119,7 +119,7 @@ def main():
 					  action="store", dest="addr") 
 	parser.add_option("-a", help="Scan all 65,535 ports", 
 					  action="store_true", default=False, dest="all_ports")
-	parser.add_option("-p", help="Do a port scan of the given ports (with -r)",
+	parser.add_option("-p", help="Do a port scan of the given ports",
 					  action="store_true", default=False, dest="port_scan")
 	parser.add_option("-v", help="Verbose output with debug",
 					  action="store_true", default=False, dest="verbose")
@@ -191,12 +191,21 @@ def main():
 	# port scan.
 	if options.port_scan is True:
 		print '[+] Port scanning \'%s\''%options.addr
-		(lower, sep, upper) = options.p_range.partition("-")
-		for i in range(int(lower), int(upper)):
-			if i%THREAD_MAX == 0:
-				time.sleep(2)
-			thread = Thread(target=port_scan, args=(options.addr, i))
-			thread.start()
+		# scan the given range
+		if options.p_range is not None:
+			(lower, sep, upper) = options.p_range.partition("-")
+			for i in range(int(lower), int(upper)):
+				if i%THREAD_MAX == 0:
+					time.sleep(2)
+				thread = Thread(target=port_scan, args=(options.addr, i))
+				thread.start()
+		# scan only the top 1023 ports
+		else:
+			for i in range(1023):
+				if i%THREAD_MAX == 0:
+					time.sleep(2)
+				thread = Thread(target=port_scan, args=(options.addr, i))
+				thread.start()
 
 # real entry
 if __name__=="__main__":
